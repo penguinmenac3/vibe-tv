@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TV Home</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a1a;
+      color: #fff;
+      padding: 40px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 2.5em;
+    }
+
+    .settings-btn {
+      padding: 12px 24px;
+      font-size: 1em;
+      background: #444;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .settings-btn:hover {
+      background: #555;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    .app-btn {
+      aspect-ratio: 1;
+      background: #333;
+      border: 3px solid #555;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.2s;
+      font-size: 1.1em;
+      font-weight: 500;
+      max-width: 50vw;
+      max-height: 60vh;
+    }
+
+    .app-btn:hover {
+      border-color: #ffd700;
+      background: #3a3a3a;
+    }
+
+    .app-btn.focused {
+      border-color: #ffd700;
+      background: #3a3a3a;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    }
+
+    .app-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      object-fit: contain;
+      background: #2a2a2a;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #2a2a2a;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal h2 {
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      background: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 1em;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #ffd700;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .btn-group button {
+      flex: 1;
+      padding: 10px;
+      background: #444;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+
+    .btn-group button:hover {
+      background: #555;
+    }
+
+    .btn-group button.primary {
+      background: #ffd700;
+      color: #000;
+    }
+
+    .btn-group button.primary:hover {
+      background: #ffed4e;
+    }
+
+    .app-list {
+      border-top: 1px solid #444;
+      padding-top: 20px;
+    }
+
+    .app-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background: #1a1a1a;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .app-item button {
+      padding: 6px 12px;
+      background: #c0392b;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+
+    .app-item button:hover {
+      background: #e74c3c;
+    }
+
+    .modal-footer {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #444;
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-footer button {
+      flex: 1;
+      padding: 10px;
+      background: #444;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+
+    .modal-footer button:hover {
+      background: #555;
+    }
+
+    .modal-footer button.primary {
+      background: #ffd700;
+      color: #000;
+    }
+
+    .modal-footer button.primary:hover {
+      background: #ffed4e;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.8em;
+      }
+
+      .grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+      }
+
+      .app-btn {
+        font-size: 0.9em;
+      }
+
+      .app-logo {
+        width: 60px;
+        height: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>TV Home</h1>
+      <button class="settings-btn" onclick="openSettings()">Settings (ESC)</button>
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <h2>Settings</h2>
+
+      <div class="form-group">
+        <label for="appName">App Name</label>
+        <input type="text" id="appName" placeholder="e.g., YouTube">
+      </div>
+
+      <div class="form-group">
+        <label for="appUrl">App URL</label>
+        <input type="text" id="appUrl" placeholder="e.g., https://www.youtube.com">
+      </div>
+
+      <div class="btn-group">
+        <button class="primary" onclick="addApp()">Add App</button>
+        <button onclick="resetApps()">Reset to Default</button>
+      </div>
+
+      <div class="app-list">
+        <h3>Current Apps</h3>
+        <div id="appsList"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="primary" onclick="closeSettings()">Close (ESC)</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_APPS = [
+      { name: 'YouTube', url: 'https://www.youtube.com' }
+    ];
+
+    let apps = [];
+    let focusIndex = 0;
+
+    function getLogoUrl(url) {
+      try {
+        const domain = new URL(url).hostname;
+        return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+      } catch {
+        return null;
+      }
+    }
+
+    function loadApps() {
+      const stored = localStorage.getItem('tvApps');
+      apps = stored ? JSON.parse(stored) : DEFAULT_APPS;
+      focusIndex = 0;
+    }
+
+    function saveApps() {
+      localStorage.setItem('tvApps', JSON.stringify(apps));
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+
+      apps.forEach((app, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'app-btn' + (index === focusIndex ? ' focused' : '');
+        btn.addEventListener('click', () => openApp(app.url));
+        btn.addEventListener('mouseover', () => setFocus(index));
+
+        const logo = document.createElement('img');
+        logo.className = 'app-logo';
+        const logoUrl = getLogoUrl(app.url);
+        if (logoUrl) {
+          logo.src = logoUrl;
+          logo.onerror = () => {
+            logo.style.display = 'none';
+          };
+        } else {
+          logo.style.display = 'none';
+        }
+
+        const name = document.createElement('div');
+        name.textContent = app.name;
+
+        btn.appendChild(logo);
+        btn.appendChild(name);
+        grid.appendChild(btn);
+      });
+    }
+
+    function renderAppsList() {
+      const list = document.getElementById('appsList');
+      list.innerHTML = '';
+
+      apps.forEach((app, index) => {
+        const item = document.createElement('div');
+        item.className = 'app-item';
+        item.innerHTML = `
+          <div>${app.name}</div>
+          <button onclick="removeApp(${index})">Remove</button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function setFocus(index) {
+      focusIndex = index;
+      renderGrid();
+    }
+
+    function moveFocus(direction) {
+      const cols = Math.max(1, Math.floor(window.innerWidth / 230));
+      const rows = Math.ceil(apps.length / cols);
+
+      if (direction === 'up') {
+        focusIndex = Math.max(0, focusIndex - cols);
+      } else if (direction === 'down') {
+        focusIndex = Math.min(apps.length - 1, focusIndex + cols);
+      } else if (direction === 'left') {
+        focusIndex = focusIndex > 0 ? focusIndex - 1 : focusIndex;
+      } else if (direction === 'right') {
+        focusIndex = focusIndex < apps.length - 1 ? focusIndex + 1 : focusIndex;
+      }
+      renderGrid();
+    }
+
+    function openApp(url) {
+      window.location.href = url;
+    }
+
+    function addApp() {
+      const name = document.getElementById('appName').value.trim();
+      const url = document.getElementById('appUrl').value.trim();
+
+      if (!name || !url) {
+        alert('Please enter both name and URL');
+        return;
+      }
+
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        alert('URL must start with http:// or https://');
+        return;
+      }
+
+      apps.push({ name, url });
+      saveApps();
+      document.getElementById('appName').value = '';
+      document.getElementById('appUrl').value = '';
+      renderAppsList();
+      renderGrid();
+    }
+
+    function removeApp(index) {
+      apps.splice(index, 1);
+      saveApps();
+      if (focusIndex >= apps.length) focusIndex = Math.max(0, apps.length - 1);
+      renderAppsList();
+      renderGrid();
+    }
+
+    function resetApps() {
+      if (confirm('Reset to default apps?')) {
+        apps = JSON.parse(JSON.stringify(DEFAULT_APPS));
+        saveApps();
+        focusIndex = 0;
+        renderAppsList();
+        renderGrid();
+      }
+    }
+
+    function openSettings() {
+      document.getElementById('modal').classList.add('open');
+      renderAppsList();
+      document.getElementById('appName').focus();
+    }
+
+    function closeSettings() {
+      document.getElementById('modal').classList.remove('open');
+      renderGrid();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('modal');
+      if (modal.classList.contains('open')) {
+        if (e.key === 'Escape') {
+          closeSettings();
+        }
+        return;
+      }
+
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        moveFocus('up');
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        moveFocus('down');
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        moveFocus('left');
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        moveFocus('right');
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        openApp(apps[focusIndex].url);
+      } else if (e.key === 'Escape') {
+        openSettings();
+      }
+    });
+
+    loadApps();
+    renderGrid();
+  </script>
+</body>
+</html>
