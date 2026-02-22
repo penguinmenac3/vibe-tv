@@ -341,8 +341,14 @@
 
       apps.forEach((app, index) => {
         const btn = document.createElement('button');
+        btn.type = 'button';
         btn.className = 'app-btn' + (index === focusIndex ? ' focused' : '');
-        btn.addEventListener('click', () => openApp(app.url));
+        btn.setAttribute('data-url', app.url);
+        
+        btn.addEventListener('click', function(e) {
+          openApp(app.url);
+        });
+        
         btn.addEventListener('mouseover', () => setFocus(index));
 
         const logo = document.createElement('img');
@@ -383,7 +389,14 @@
 
     function setFocus(index) {
       focusIndex = index;
-      renderGrid();
+      // Update focus class without re-rendering
+      document.querySelectorAll('.app-btn').forEach((btn, i) => {
+        if (i === index) {
+          btn.classList.add('focused');
+        } else {
+          btn.classList.remove('focused');
+        }
+      });
     }
 
     function moveFocus(direction) {
@@ -399,7 +412,7 @@
       } else if (direction === 'right') {
         focusIndex = focusIndex < apps.length - 1 ? focusIndex + 1 : focusIndex;
       }
-      renderGrid();
+      setFocus(focusIndex);
     }
 
     function openApp(url) {
