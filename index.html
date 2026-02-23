@@ -311,10 +311,33 @@
       border-radius: 0.3vw;
       cursor: pointer;
       font-size: 0.9em;
+      margin-left: 0.5vw;
     }
 
     .app-item button:hover {
       background: var(--color-bad-selected);
+    }
+
+    .app-item button.reorder-btn {
+      padding: 0.5vw 0.8vw;
+      background: var(--color-brand);
+      color: var(--color-brand-c);
+    }
+
+    .app-item button.reorder-btn:hover {
+      background: var(--color-brand-selected);
+    }
+
+    .app-item button.reorder-btn:disabled {
+      background: var(--color-base-disabled);
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .app-item-controls {
+      display: flex;
+      gap: 0.4vw;
+      align-items: center;
     }
 
     .modal-footer {
@@ -489,7 +512,11 @@
         item.className = 'app-item';
         item.innerHTML = `
           <div>${app.name}</div>
-          <button onclick="removeApp(${index})">Remove</button>
+          <div class="app-item-controls">
+            <button class="reorder-btn" onclick="moveAppUp(${index})" ${index === 0 ? 'disabled' : ''}>↑</button>
+            <button class="reorder-btn" onclick="moveAppDown(${index})" ${index === apps.length - 1 ? 'disabled' : ''}>↓</button>
+            <button onclick="removeApp(${index})">Remove</button>
+          </div>
         `;
         list.appendChild(item);
       });
@@ -555,6 +582,24 @@
       if (focusIndex >= apps.length) focusIndex = Math.max(0, apps.length - 1);
       renderAppsList();
       renderGrid();
+    }
+
+    function moveAppUp(index) {
+      if (index > 0) {
+        [apps[index], apps[index - 1]] = [apps[index - 1], apps[index]];
+        saveApps();
+        renderAppsList();
+        renderGrid();
+      }
+    }
+
+    function moveAppDown(index) {
+      if (index < apps.length - 1) {
+        [apps[index], apps[index + 1]] = [apps[index + 1], apps[index]];
+        saveApps();
+        renderAppsList();
+        renderGrid();
+      }
     }
 
     function resetApps() {
