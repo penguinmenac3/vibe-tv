@@ -576,7 +576,16 @@
           openApp(app.url);
         });
         
-        btn.addEventListener('mouseover', () => setFocus(index));
+        btn.addEventListener('mouseover', () => {
+          focusIndex = index;
+          document.querySelectorAll('.app-btn').forEach((btn, i) => {
+            if (i === index) {
+              btn.classList.add('focused');
+            } else {
+              btn.classList.remove('focused');
+            }
+          });
+        });
 
         const logo = document.createElement('img');
         logo.className = 'app-logo';
@@ -625,6 +634,8 @@
       document.querySelectorAll('.app-btn').forEach((btn, i) => {
         if (i === index) {
           btn.classList.add('focused');
+          // Scroll focused button into view
+          btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
         } else {
           btn.classList.remove('focused');
         }
@@ -632,13 +643,65 @@
     }
 
     function moveFocus(direction) {
-      const cols = Math.max(1, Math.floor(window.innerWidth / 230));
-      const rows = Math.ceil(apps.length / cols);
+      const buttons = Array.from(document.querySelectorAll('.app-btn'));
+      const currentBtn = buttons[focusIndex];
+      const currentRect = currentBtn.getBoundingClientRect();
+      const currentCenterX = currentRect.left + currentRect.width / 2;
 
       if (direction === 'up') {
-        focusIndex = Math.max(0, focusIndex - cols);
+        // Find the button in the row above with closest X position
+        const buttonsAbove = buttons.filter((btn, idx) => {
+          const btnRect = btn.getBoundingClientRect();
+          return btnRect.top < currentRect.top - 10; // 10px threshold for same row
+        });
+        
+        if (buttonsAbove.length > 0) {
+          // Find the maximum top position (the row immediately above)
+          const maxTopInAboveRows = Math.max(...buttonsAbove.map(btn => btn.getBoundingClientRect().top));
+          
+          // Filter to only buttons in the immediately adjacent row
+          const buttonsInRowAbove = buttonsAbove.filter(btn => {
+            const btnRect = btn.getBoundingClientRect();
+            return Math.abs(btnRect.top - maxTopInAboveRows) < 10;
+          });
+          
+          // Find the one with closest X center
+          const closest = buttonsInRowAbove.reduce((prev, curr) => {
+            const prevRect = prev.getBoundingClientRect();
+            const currRect = curr.getBoundingClientRect();
+            const prevCenter = prevRect.left + prevRect.width / 2;
+            const currCenter = currRect.left + currRect.width / 2;
+            return Math.abs(currCenter - currentCenterX) < Math.abs(prevCenter - currentCenterX) ? curr : prev;
+          });
+          focusIndex = buttons.indexOf(closest);
+        }
       } else if (direction === 'down') {
-        focusIndex = Math.min(apps.length - 1, focusIndex + cols);
+        // Find the button in the row below with closest X position
+        const buttonsBelow = buttons.filter((btn, idx) => {
+          const btnRect = btn.getBoundingClientRect();
+          return btnRect.top > currentRect.bottom + 10; // 10px threshold for same row
+        });
+        
+        if (buttonsBelow.length > 0) {
+          // Find the minimum top position (the row immediately below)
+          const minTopInBelowRows = Math.min(...buttonsBelow.map(btn => btn.getBoundingClientRect().top));
+          
+          // Filter to only buttons in the immediately adjacent row
+          const buttonsInRowBelow = buttonsBelow.filter(btn => {
+            const btnRect = btn.getBoundingClientRect();
+            return Math.abs(btnRect.top - minTopInBelowRows) < 10;
+          });
+          
+          // Find the one with closest X center
+          const closest = buttonsInRowBelow.reduce((prev, curr) => {
+            const prevRect = prev.getBoundingClientRect();
+            const currRect = curr.getBoundingClientRect();
+            const prevCenter = prevRect.left + prevRect.width / 2;
+            const currCenter = currRect.left + currRect.width / 2;
+            return Math.abs(currCenter - currentCenterX) < Math.abs(prevCenter - currentCenterX) ? curr : prev;
+          });
+          focusIndex = buttons.indexOf(closest);
+        }
       } else if (direction === 'left') {
         focusIndex = focusIndex > 0 ? focusIndex - 1 : focusIndex;
       } else if (direction === 'right') {
